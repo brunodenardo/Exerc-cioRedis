@@ -49,9 +49,7 @@ class RedisFavoritos:
         favoritos = list(favoritos)
         print(type(favoritos))
         for favorito in favoritos:
-            print(favoritos[numero].decode('utf-8'))
             manipulador = favoritos[numero].decode('utf-8')
-            print(manipulador + " tipo: " + str(type(manipulador)))
             manipulador = json.loads(manipulador)
             favoritos[numero] = manipulador
             favoritos[numero]["numero"] = numero

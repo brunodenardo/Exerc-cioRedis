@@ -1,6 +1,7 @@
 from Servicos.EscolheColecao import EscolheColecao
 import json
 from Redis.RedisConexao import RedisConexao
+from datetime import datetime
 
 class RedisCompras:
 
@@ -14,20 +15,18 @@ class RedisCompras:
     def pegaComprasMongo(self, login, id):
         usuarioCompras = self.colecao.find_one({"usuario_id":id})
         compras = usuarioCompras["usuario_compras"]
-        print(compras)
         for compra in compras: 
-            print(compra)
             nomeLista = f"compras{login}"
-            compraInserido = json.dumps(compra)
+            compraInserido = str(compra)
             self.redis.conexao.rpush(nomeLista, compraInserido)
 
 
     def reinsereComprasMongo(self, login, id):
         comprasRedis = self.redis.conexao.lrange(f"compras{login}", 0, -1)
-        print(f"comprasRedis: {comprasRedis}")
+        print(f"comprasRedis: {comprasRedis} \n")
         compras = []
         for compra in comprasRedis:
-            compras.append(json.loads(compra))
+            compras.append(json.loads(compra.decode('utf-8')))
         self.colecao.update_one({"usuario_id":id}, {"$set": {"usuario_compras": compras}})
         self.redis.conexao.delete(f"compras{login}")
 

@@ -5,6 +5,7 @@ from Redis.RedisCompras import RedisCompras
 from MongoDB.Crud.CrudProduto import CrudProduto
 from Servicos.SelecionadorIds import SelecionadorIds
 from Redis.RedisConexao import RedisConexao
+from datetime import datetime
 
 
 class MenuUsuarioLogado:
@@ -54,24 +55,22 @@ class MenuUsuarioLogado:
                     print(produto)
                 else:
                     produto = self.crudProduto.Find(produto)
-                    produto = "{" + f'"produto_id": "{produto["_id"]}", "produto_nome": "{produto["produto_nome"]}", "produto_oferta": {produto["produto_oferta"]}, "produto_preco": {produto["produto_preco"]}' + "}"
+                    produto["data_hora_compra"] = datetime.now()
+                    produto = "{" + f'"produto_id": "{produto["_id"]}", "produto_nome": "{produto["produto_nome"]}", "data_hora_compra": "{produto["data_hora_compra"]}", "produto_oferta": {produto["produto_oferta"]}, "produto_preco": {produto["produto_preco"]}' + "}"
                     self.redisCompras.adicionaCompra(produto, login)
             
             elif key == "4" and self.validador.validacaoLogin(login, senha):
                 lista = self.redisConexao.conexao.lrange(f"favoritos{login}", 0, -1)
                 for produto in lista:
-                    print(produto)
+                    print(produto.decode("utf-8"))
 
             elif key == "5" and self.validador.validacaoLogin(login, senha):
-                print(self.redisConexao.conexao.lrange(f"compras{login}", 0, -1))
+                lista = self.redisConexao.conexao.lrange(f"compras{login}", 0, -1)
+                for produto in lista:
+                    print(produto.decode("utf-8"))
 
 
             elif key == "6" and self.validador.validacaoLogin(login, senha):
-                self.redisCompras.reinsereComprasMongo(login, id)
-                self.redisFavoritos.reinsereFavoritosMongo(login, id)
-                self.redisConexao.deslogar(login)
-                break
-            else:
                 self.redisCompras.reinsereComprasMongo(login, id)
                 self.redisFavoritos.reinsereFavoritosMongo(login, id)
                 self.redisConexao.deslogar(login)
